@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:vector_math/vector_math.dart';
+import 'package:collection/collection.dart';
 
 Future<List<LineData>> loadFileData({required String fileName}) async {
   List<LineData> inputData = [];
@@ -39,22 +40,37 @@ Map<Neighborhood, List<(Homeowner, num)>> computeScores(
   List<Neighborhood> neighborhoods =
       fileData.whereType<Neighborhood>().toList();
   List<Homeowner> homeowners = fileData.whereType<Homeowner>().toList();
+  for (var each in homeowners) {
+    print(each.preferences);
+  }
   int maxPerNeighborhood = homeowners.length ~/ neighborhoods.length;
   Map<Neighborhood, List<(Homeowner, num)>> map = {
     for (var n in neighborhoods) n: []
   };
+  print("--------");
+  homeowners.sort(Homeowner.compareByPreferences);
+  for (var each in homeowners) {
+    print("${each.id}: ${each.preferences}");
+  }
   for (var n in neighborhoods) {
     List<(Homeowner, num)> nCandidates = [];
     for (var h in homeowners) {
-      if (map.containsValue(h)) continue;
-      if (map[n]?.length == maxPerNeighborhood) break;
+      if (map.containsValue(h)) {
+        continue;
+      }
+      if (map[n]?.length == maxPerNeighborhood) {
+        break;
+      }
+      if (h.preferences.first != n.id && map[n]?.length != maxPerNeighborhood) {
+        continue;
+      }
       double score = Vector3(n.energy, n.water, n.resilience)
           .dot(Vector3(h.energy, h.water, h.resilience));
-      print("${h.id} score: $score for neighborhood ${n.id}");
-      print(
-          "values used for h=>  E:${h.energy} W:${h.water} R:${h.resilience}");
-      print(
-          "values used for n=>  E:${n.energy} W:${n.water} R:${n.resilience}");
+      // print("${h.id} score: $score for neighborhood ${n.id}");
+      // print(
+      //     "values used for h=>  E:${h.energy} W:${h.water} R:${h.resilience}");
+      // print(
+      //     "values used for n=>  E:${n.energy} W:${n.water} R:${n.resilience}");
       (Homeowner, num) candidate = (h, score);
       nCandidates.add(candidate);
     }
@@ -71,6 +87,7 @@ Map<Neighborhood, List<(Homeowner, num)>> computeScores(
 }
 
 void printResult(Map<Neighborhood, List<(Homeowner, num)>> map) {
+  print("");
   for (var e in map.entries) {
     List<String> test = [];
     for (var each in e.value) {
@@ -119,6 +136,10 @@ class Homeowner extends LineData {
     required super.water,
     required super.resilience,
   });
+
+  static int compareByPreferences(Homeowner a, Homeowner b) {
+    return a.preferences.join("").compareTo(b.preferences.join(""));
+  }
 
   @override
   String toString() {
