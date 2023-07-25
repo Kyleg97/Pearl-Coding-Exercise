@@ -52,7 +52,7 @@ void writeFileData({
   }
 }
 
-Map<Neighborhood, List<(Homeowner, int)>> distributeHomeowners2({
+Map<Neighborhood, List<(Homeowner, int)>> distributeHomeowners({
   required List<PearlData> fileData,
 }) {
   List<Neighborhood> neighborhoods =
@@ -86,6 +86,9 @@ Map<Neighborhood, List<(Homeowner, int)>> distributeHomeowners2({
         homeowners[currentIndex],
         homeowners[currentIndex].calculateDotProduct(neighborhood)
       ));
+      print(
+        "placed ${homeowners[currentIndex].id} in neighborhood ${neighborhood.id}",
+      );
       currentIndex++;
     }
 
@@ -97,7 +100,7 @@ Map<Neighborhood, List<(Homeowner, int)>> distributeHomeowners2({
 }
 
 void printResult(Map<Neighborhood, List<(Homeowner, int)>> map) {
-  print("");
+  print("\nResult:");
   for (var e in map.entries) {
     List<String> test = [];
     for (var each in e.value) {
@@ -105,6 +108,6 @@ void printResult(Map<Neighborhood, List<(Homeowner, int)>> map) {
       // var str = each.id;
       test.add(str);
     }
-    print("${e.key.id}: ${test.join(" ")}\n");
+    print("${e.key.id}: ${test.join(" ")}");
   }
 }
