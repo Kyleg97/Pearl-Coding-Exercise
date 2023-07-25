@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:vector_math/vector_math.dart';
+import 'package:pearl/pearl_data.dart';
 
 Future<List<PearlData>> readFileData({required String fileName}) async {
   List<PearlData> inputData = [];
@@ -33,8 +33,9 @@ Future<List<PearlData>> readFileData({required String fileName}) async {
   return inputData;
 }
 
-void writeFileData(
-    {required Map<Neighborhood, List<(Homeowner, int)>> map}) async {
+void writeFileData({
+  required Map<Neighborhood, List<(Homeowner, int)>> map,
+}) async {
   File outputFile = File("output.txt");
   String strToWrite = "";
   for (var key in map.keys) {
@@ -60,11 +61,6 @@ Map<Neighborhood, List<(Homeowner, int)>> distributeHomeowners2({
 
   Map<Neighborhood, List<(Homeowner, int)>> map = {};
 
-  print("homeowners before sorting...");
-  for (var each in homeowners) {
-    print("${each.id}: ${each.preferences}");
-  }
-
   // sort the homeowners based on their priorities and scores
   homeowners.sort((a, b) {
     int preferencesComparison =
@@ -76,8 +72,6 @@ Map<Neighborhood, List<(Homeowner, int)>> distributeHomeowners2({
         .calculateDotProduct(neighborhoods.first)
         .compareTo(a.calculateDotProduct(neighborhoods.first));
   });
-  print("homeowners after sorting...");
-  print(homeowners);
 
   int homeownersPerNeighborhood = (homeowners.length ~/ neighborhoods.length);
 
@@ -112,63 +106,5 @@ void printResult(Map<Neighborhood, List<(Homeowner, int)>> map) {
       test.add(str);
     }
     print("${e.key.id}: ${test.join(" ")}\n");
-  }
-}
-
-class PearlData {
-  final String id;
-  final double energy;
-  final double water;
-  final double resilience;
-
-  int calculateDotProduct(Neighborhood neighborhood) {
-    return Vector3(energy, water, resilience)
-        .dot(
-          Vector3(
-              neighborhood.energy, neighborhood.water, neighborhood.resilience),
-        )
-        .ceil();
-  }
-
-  PearlData({
-    required this.id,
-    required this.energy,
-    required this.water,
-    required this.resilience,
-  });
-}
-
-class Neighborhood extends PearlData {
-  Neighborhood({
-    required super.id,
-    required super.energy,
-    required super.water,
-    required super.resilience,
-  });
-
-  @override
-  String toString() {
-    // return "N $id E:$energy W:$water R:$resilience";
-    return id;
-  }
-}
-
-class Homeowner extends PearlData {
-  final List<String> preferences;
-  Homeowner({
-    required this.preferences,
-    required super.id,
-    required super.energy,
-    required super.water,
-    required super.resilience,
-  });
-
-  static int compareByPreferences((Homeowner, int) a, (Homeowner, int) b) {
-    return a.$1.preferences.join("").compareTo(b.$1.preferences.join(""));
-  }
-
-  @override
-  String toString() {
-    return "H $id E:$energy W:$water R:$resilience ${preferences.join(">")}";
   }
 }
