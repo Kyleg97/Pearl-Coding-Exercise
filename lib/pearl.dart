@@ -35,70 +35,6 @@ Future<List<PearlData>> loadFileData({required String fileName}) async {
   return inputData;
 }
 
-Map<Neighborhood, List<(Homeowner, num)>> distributeHomeowners({
-  required List<PearlData> fileData,
-}) {
-  List<Neighborhood> neighborhoods =
-      fileData.whereType<Neighborhood>().toList();
-  List<Homeowner> homeowners = fileData.whereType<Homeowner>().toList();
-  int maxPerNeighborhood = homeowners.length ~/ neighborhoods.length;
-  Map<Neighborhood, List<(Homeowner, num)>> map = {
-    for (var n in neighborhoods) n: []
-  };
-  // sort homeowners by preferences (N0 to Nn)
-  homeowners.sort((a, b) {
-    return a.preferences.join("").compareTo(b.preferences.join(""));
-  });
-  for (var h in homeowners) {
-    print("${h.id}: ${h.preferences}");
-  }
-
-  // loop through each neighborhood
-  for (var n in neighborhoods) {
-    // possible homeowners for that neighborhood
-    List<(Homeowner, num)> nCandidates = [];
-    for (var h in homeowners) {
-      if (map[n]?.length == maxPerNeighborhood) {
-        break;
-      }
-      if (map.containsValue(h)) {
-        continue;
-      }
-      double score = Vector3(n.energy, n.water, n.resilience)
-          .dot(Vector3(h.energy, h.water, h.resilience));
-      (Homeowner, num) candidate = (h, score);
-      nCandidates.add(candidate);
-    }
-
-    print("");
-    print("${n.id} nCandidates before sort");
-    for (var each in nCandidates) {
-      print("${each.$1.id}: ${each.$2} ${each.$1.preferences}");
-    }
-
-    nCandidates.sort(Homeowner.compareByPreferences);
-    // nCandidates = nCandidates.sublist(0, maxPerNeighborhood);
-    print("${n.id} nCandidates after 1st sort");
-    for (var each in nCandidates) {
-      print("${each.$1.id}: ${each.$2} ${each.$1.preferences}");
-    }
-    nCandidates.sort((a, b) => b.$2.compareTo(a.$2));
-    print("${n.id} nCandidates after 2nd sort");
-    for (var each in nCandidates) {
-      print("${each.$1.id}: ${each.$2} ${each.$1.preferences}");
-    }
-    print("");
-    var topCandidates = nCandidates.take(maxPerNeighborhood).toList();
-    map[n] = topCandidates;
-    for (var e in topCandidates) {
-      if (homeowners.contains(e.$1)) {
-        homeowners.remove(e.$1);
-      }
-    }
-  }
-  return map;
-}
-
 Map<Neighborhood, List<(Homeowner, num)>> distributeHomeowners2({
   required List<PearlData> fileData,
 }) {
@@ -113,7 +49,7 @@ Map<Neighborhood, List<(Homeowner, num)>> distributeHomeowners2({
     print("${each.id}: ${each.preferences}");
   }
 
-  // Sort the homeowners based on their priorities and scores
+  // sort the homeowners based on their priorities and scores
   homeowners.sort((a, b) {
     int preferencesComparison =
         a.preferences.join("").compareTo(b.preferences.join(""));
@@ -131,6 +67,7 @@ Map<Neighborhood, List<(Homeowner, num)>> distributeHomeowners2({
 
   int currentIndex = 0;
 
+  // create lists of homeowners for each neighborhoods
   for (var neighborhood in neighborhoods) {
     List<(Homeowner, num)> homeownersForNeighborhood = [];
 
