@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:vector_math/vector_math.dart';
-import 'package:collection/collection.dart';
 
-Future<List<PearlData>> loadFileData({required String fileName}) async {
+Future<List<PearlData>> readFileData({required String fileName}) async {
   List<PearlData> inputData = [];
   await File(fileName).readAsLines().then(
     (List<String> lines) {
@@ -35,14 +33,32 @@ Future<List<PearlData>> loadFileData({required String fileName}) async {
   return inputData;
 }
 
-Map<Neighborhood, List<(Homeowner, num)>> distributeHomeowners2({
+void writeFileData(
+    {required Map<Neighborhood, List<(Homeowner, int)>> map}) async {
+  File outputFile = File("output.txt");
+  String strToWrite = "";
+  for (var key in map.keys) {
+    // print("${key.id}: ${map[key]?.join("")}");
+    strToWrite += "${key.id}:";
+    map[key]?.forEach((element) {
+      strToWrite += " ${element.$1.id}(${element.$2})";
+    });
+    strToWrite += "\n";
+    outputFile.writeAsString(
+      strToWrite,
+      mode: FileMode.writeOnly,
+    );
+  }
+}
+
+Map<Neighborhood, List<(Homeowner, int)>> distributeHomeowners2({
   required List<PearlData> fileData,
 }) {
   List<Neighborhood> neighborhoods =
       fileData.whereType<Neighborhood>().toList();
   List<Homeowner> homeowners = fileData.whereType<Homeowner>().toList();
 
-  Map<Neighborhood, List<(Homeowner, num)>> map = {};
+  Map<Neighborhood, List<(Homeowner, int)>> map = {};
 
   print("homeowners before sorting...");
   for (var each in homeowners) {
@@ -69,7 +85,7 @@ Map<Neighborhood, List<(Homeowner, num)>> distributeHomeowners2({
 
   // create lists of homeowners for each neighborhoods
   for (var neighborhood in neighborhoods) {
-    List<(Homeowner, num)> homeownersForNeighborhood = [];
+    List<(Homeowner, int)> homeownersForNeighborhood = [];
 
     for (int i = 0; i < homeownersPerNeighborhood; i++) {
       homeownersForNeighborhood.add((
@@ -79,13 +95,14 @@ Map<Neighborhood, List<(Homeowner, num)>> distributeHomeowners2({
       currentIndex++;
     }
 
+    homeownersForNeighborhood.sort((a, b) => b.$2.compareTo(a.$2));
     map[neighborhood] = homeownersForNeighborhood;
   }
 
   return map;
 }
 
-void printResult(Map<Neighborhood, List<(Homeowner, num)>> map) {
+void printResult(Map<Neighborhood, List<(Homeowner, int)>> map) {
   print("");
   for (var e in map.entries) {
     List<String> test = [];
@@ -104,10 +121,13 @@ class PearlData {
   final double water;
   final double resilience;
 
-  double calculateDotProduct(Neighborhood neighborhood) {
-    return Vector3(energy, water, resilience).dot(
-      Vector3(neighborhood.energy, neighborhood.water, neighborhood.resilience),
-    );
+  int calculateDotProduct(Neighborhood neighborhood) {
+    return Vector3(energy, water, resilience)
+        .dot(
+          Vector3(
+              neighborhood.energy, neighborhood.water, neighborhood.resilience),
+        )
+        .ceil();
   }
 
   PearlData({
@@ -143,7 +163,7 @@ class Homeowner extends PearlData {
     required super.resilience,
   });
 
-  static int compareByPreferences((Homeowner, num) a, (Homeowner, num) b) {
+  static int compareByPreferences((Homeowner, int) a, (Homeowner, int) b) {
     return a.$1.preferences.join("").compareTo(b.$1.preferences.join(""));
   }
 
