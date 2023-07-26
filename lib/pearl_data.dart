@@ -2,15 +2,22 @@ import 'package:vector_math/vector_math.dart';
 
 class PearlData {
   final String id;
-  final double energy;
-  final double water;
-  final double resilience;
+  final int energy;
+  final int water;
+  final int resilience;
 
-  int calculateDotProduct(Neighborhood neighborhood) {
-    return Vector3(energy, water, resilience)
+  int calculateDotProduct(PearlData other) {
+    return Vector3(
+      energy.toDouble(),
+      water.toDouble(),
+      resilience.toDouble(),
+    )
         .dot(
           Vector3(
-              neighborhood.energy, neighborhood.water, neighborhood.resilience),
+            other.energy.toDouble(),
+            other.water.toDouble(),
+            other.resilience.toDouble(),
+          ),
         )
         .ceil();
   }

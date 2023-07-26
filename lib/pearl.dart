@@ -12,17 +12,17 @@ Future<List<PearlData>> readFileData({required String fileName}) async {
         if (currentLineList.first == "N") {
           Neighborhood neighborhood = Neighborhood(
             id: currentLineList[1],
-            energy: double.parse(currentLineList[2].substring(2)),
-            water: double.parse(currentLineList[3].substring(2)),
-            resilience: double.parse(currentLineList[4].substring(2)),
+            energy: int.parse(currentLineList[2].substring(2)),
+            water: int.parse(currentLineList[3].substring(2)),
+            resilience: int.parse(currentLineList[4].substring(2)),
           );
           inputData.add(neighborhood);
         } else if (currentLineList.first == "H") {
           Homeowner homeowner = Homeowner(
             id: currentLineList[1],
-            energy: double.parse(currentLineList[2].substring(2)),
-            water: double.parse(currentLineList[3].substring(2)),
-            resilience: double.parse(currentLineList[4].substring(2)),
+            energy: int.parse(currentLineList[2].substring(2)),
+            water: int.parse(currentLineList[3].substring(2)),
+            resilience: int.parse(currentLineList[4].substring(2)),
             preferences: currentLineList[5].split(">"),
           );
           inputData.add(homeowner);
